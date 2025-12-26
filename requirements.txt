@@ -16,4 +16,3 @@ redis==5.2.0
 chromadb==0.5.23
 pymupdf
 python-multipart
-fitzpy
