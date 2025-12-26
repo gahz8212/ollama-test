@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ollama FastAPI Tester</title>
+
+  <!-- Bootstrap 5 -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+  />
+
+  <style>
+    /* 결과 출력 박스: 콘솔 느낌 + 줄바꿈/공백 유지 */
+    #result {
+      white-space: pre-wrap;
+      overflow: auto;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.95rem;
+      line-height: 1.45;
+      min-height: 380px;
+      max-height: 520px;
+      background: #fff8c5; /* 너무 쨍한 노랑 대신 부드러운 톤 */
+      border: 1px solid rgba(0,0,0,.1);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    /* 긴 문자열도 보기 좋게 */
+    #result {
+      word-break: break-word;
+    }
+  </style>
+</head>
+
+<body class="bg-light">
+  <div class="container py-4 py-lg-5">
+
+    <!-- Header -->
+    <div class="d-flex align-items-start align-items-md-center justify-content-between flex-column flex-md-row gap-3 mb-4">
+      <div>
+        <h1 class="h4 mb-1">Ollama + FastAPI 테스트</h1>
+        <div class="text-secondary small">
+          링크/입력으로 API 호출 후 결과를 아래 콘솔 형태로 출력합니다.
+        </div>
+      </div>
+      <div class="d-flex gap-2">
+        <a class="btn btn-outline-secondary btn-sm" href="/health">Health</a>
+        <a class="btn btn-outline-secondary btn-sm" href="/chat?word=http+port">http 기본 port</a>
+        <a class="btn btn-outline-secondary btn-sm" href="/stream?word=한국정보">korea 정보(한글)</a>
+        <a class="btn btn-outline-secondary btn-sm" href="/chat?word=bmw">bmw 정보</a>
+        <!-- 새로 추가된 ollama-test 버튼 -->
+        <a href="/ollama-test">
+        <button id="ollamaTestBtn" class="btn btn-outline-primary btn-sm">
+          ollama-test
+        </button>
+        </a>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <!-- Left: Forms -->
+      <div class="col-12 col-lg-5">
+        <div class="card shadow-sm border-0 rounded-4">
+          <div class="card-body p-4">
+
+            <div class="mb-3">
+              <div class="fw-semibold mb-1">스트리밍 페이지로 이동</div>
+              <div class="text-secondary small">GET /stream?word=...</div>
+            </div>
+
+            <form method="get" action="/stream" class="mb-4">
+              <div class="input-group">
+                <span class="input-group-text">word</span>
+                <input type="text" class="form-control" name="word" value="2002 worldcup" />
+                <button class="btn btn-primary" type="submit">Search</button>
+              </div>
+              <div class="form-text">
+                이 폼은 결과를 아래 박스가 아니라 <code>/stream</code> 페이지에서 확인합니다.
+              </div>
+            </form>
+
+            <hr class="my-4" />
+
+            <div class="mb-3">
+              <div class="fw-semibold mb-1">아래 결과 박스에 출력</div>
+              <div class="text-secondary small">GET /chat?word=...</div>
+            </div>
+
+            <div class="input-group">
+              <span class="input-group-text">word</span>
+              <input type="text" id="word" class="form-control" value="점심 뭐 먹을까" />
+              <button id="under" class="btn btn-success" type="button">
+                결과 출력
+              </button>
+            </div>
+
+            <div class="d-flex align-items-center justify-content-between mt-3">
+              <div class="text-secondary small">
+                공백/줄바꿈은 그대로 유지됩니다.
+              </div>
+              <button id="clear" class="btn btn-link btn-sm text-decoration-none" type="button">
+                Clear
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Result -->
+      <div class="col-12 col-lg-7">
+        <div class="card shadow-sm border-0 rounded-4">
+          <div class="card-header bg-white border-0 rounded-top-4 px-4 pt-4 pb-2">
+            <div class="d-flex align-items-center justify-content-between">
+              <div>
+                <div class="fw-semibold">Result</div>
+                <div class="text-secondary small">콘솔 스타일 출력 영역</div>
+              </div>
+              <span id="status" class="badge text-bg-secondary">idle</span>
+            </div>
+          </div>
+
+          <div class="card-body px-4 pb-4">
+            <div id="result">여기에 결과가 표시됩니다.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Axios -->
+  <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+  <script>
+    const resultEl = document.getElementById("result");
+    const statusEl = document.getElementById("status");
+    const wordEl = document.getElementById("word");
+
+    function setStatus(type, text) {
+      statusEl.className = "badge";
+      if (type === "loading") statusEl.classList.add("text-bg-warning");
+      else if (type === "ok") statusEl.classList.add("text-bg-success");
+      else if (type === "error") statusEl.classList.add("text-bg-danger");
+      else statusEl.classList.add("text-bg-secondary");
+      statusEl.textContent = text;
+    }
+
+     document.getElementById('under').addEventListener('click', function () {
+        // alert('클릭했음');
+
+        word = document.getElementById('word').value
+        //<input id='word' value="내가 입력한 데이터">
+
+        // 입력한 word를 가지고와서 axios로 보내야함.
+        // axios로 word를 get방식으로 보내고
+        axios.get('/stream?word=' + word).then(function (response){
+
+            // axios의 결과를 받아와서 id="result"인 곳에 넣어주자.
+            console.log(response) // {data : "내용이 들어있음"}
+            data = response.data
+            document.getElementById('result').textContent = data
+        });
+    });
+
+    document.getElementById("clear").addEventListener("click", function () {
+      resultEl.textContent = "";
+      setStatus("idle", "idle");
+      wordEl.value = "";
+      wordEl.focus();
+    });
+
+    // Enter 키로도 실행
+    wordEl.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        document.getElementById("under").click();
+      }
+    });
+
+    document.getElementById("ollamaTestBtn").addEventListener("click", function () {
+
+      axios.get('/ollama-test').then(()=>{})
+      resultEl.textContent = "";
+      setStatus("idle", "idle");
+
+    });
+  </script>
+</body>
+</html>

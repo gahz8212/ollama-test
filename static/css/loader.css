@@ -1,0 +1,148 @@
+.loader {
+border: 16px solid transparent; /* Light grey */
+border: 16px solid #3498db; /* Blue */
+    border-top: 16px solid transparent; /* Blue */
+border-radius: 50%;
+width: 60px;
+height: 60px;
+position:fixed;
+top:50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+
+animation: spin 2s linear infinite;
+}
+
+.loader.off {
+visibility: hidden;
+}
+
+.tloader {
+border: 16px solid transparent; /* Light grey */
+border: 16px solid #3498db; /* Blue */
+    border-top: 16px solid white; /* Blue */
+border-radius: 50%;
+width: 60px;
+height: 60px;
+position:fixed;
+top:50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+
+animation: spin 2s linear infinite;
+}
+
+.tloader.off {
+visibility: hidden;
+}
+
+.nloader {
+border: 16px solid transparent; /* Light grey */
+border: 16px solid #3498db; /* Blue */
+    border-top: 16px solid white; /* Blue */
+border-radius: 50%;
+width: 60px;
+height: 60px;
+position:fixed;
+top:50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+
+animation: spin 2s linear infinite;
+}
+
+.nloader.off {
+visibility: hidden;
+}
+
+
+.ploader {
+border: 16px solid transparent; /* Light grey */
+border: 16px solid #3498db; /* Blue */
+    border-top: 16px solid white; /* Blue */
+border-radius: 50%;
+width: 60px;
+height: 60px;
+position:fixed;
+top:50%;
+    left:50%;
+    transform: translate(-50%,-50%);
+
+animation: spin 2s linear infinite;
+}
+
+.ploader.off {
+visibility: hidden;
+}
+
+
+.prloader {
+border: 16px solid transparent; /* Light grey */
+border: 16px solid hotpink;
+    border-top: 16px solid white; /* Blue */
+border-radius: 50%;
+width: 60px;
+height: 60px;
+position:fixed;
+top:50%;
+left:50%;
+transform: translate(-50%,-50%);
+
+animation: spin 2s linear infinite;
+}
+
+.prloader.off {
+visibility: hidden;
+}
+@keyframes spin {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+
+
+.cloader {
+border: 16px solid transparent; /* Light grey */
+border: 16px solid hotpink;
+    border-top: 16px solid white; /* Blue */
+border-radius: 50%;
+width: 60px;
+height: 60px;
+position:fixed;
+top:50%;
+left:50%;
+transform: translate(-50%,-50%);
+animation: spin 2s linear infinite;
+}
+
+.cloader.off {
+visibility: hidden;
+}
+
+.chat-box .user{
+
+    background:yellow;
+    text-align:right;
+    padding-right:50px;
+    pading:10px;
+    color:black;
+    margin:.5rem;
+    word-break:break-all;
+    font-size:1.1rem;
+}
+.chat-box .ai{
+    background:greenyellow;
+    pading:10px;
+    text-align:left;
+    padding-left:20px;
+    color:black;
+    margin:.5rem;
+    word-break:break-all;
+    font-size:1.1rem;
+}
+
+
+@keyframes spin {
+0% { transform: rotate(0deg); }
+100% { transform: rotate(360deg); }
+}
+
