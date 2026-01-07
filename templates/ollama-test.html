@@ -277,7 +277,7 @@ const cspn=document.querySelector('.cloader')
     const style=document.getElementById("poemStyle").value.trim();
     pspn.classList.remove("off")
 
-    await axios.post('/poem', {topic, style}).then((response) => {
+    await axios.post('/ai/poem', {topic, style}).then((response) => {
       pspn.classList.add("off")
        poemResult.innerHTML = response.data.summary
     })

@@ -11,7 +11,10 @@ from fastapi.responses import HTMLResponse
 # from ollama_client import stream_generate
 from redis.asyncio import Redis  # redis-py의 async 클라이언트
 import json
-
+import os
+from dotenv import load_dotenv
+from fastapi.middleware.cors import CORSMiddleware
+# .env 파일 로드
 
 # from fastapi.middleware.cors import CORSMiddleware
 # from transformers import pipeline
@@ -23,7 +26,14 @@ class HealthResponse(BaseModel):
     message: str
 
 
+load_dotenv()
 app = FastAPI()
+# -----------------------
+# CORS 설정
+# -----------------------
+# .env에서 읽어서 리스트 형태로 변환
+origins = os.getenv("CORS_ORIGINS", "").split(",")
+
 
 # Redis 설정 (로컬 개발 기준, 프로덕션에서는 환경변수로 관리)
 MODEL = "gemma3:1b"
@@ -38,13 +48,13 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # CORS 설정 (클라이언트 도메인 허용, 개발 시 "*"로 테스트)
-# app.add_middleware(
-#     CORSMiddleware,
-#     allow_origins=["*"],  # 프로덕션에서는 특정 도메인으로 제한, 예: ["http://localhost:3000"]
-#     allow_credentials=True,
-#     allow_methods=["*"],
-#     allow_headers=["*"],
-# )
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 프로덕션에서는 특정 도메인으로 제한, 예: ["http://localhost:3000"]
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 사용할 모델 이름 (미리 ollama pull <model>로 다운로드 필요, 예: ollama pull llama3.2)
 # MODEL = "llama3.2"
@@ -346,7 +356,7 @@ class ChatRequest(BaseModel):
 class PoemsRequest(BaseModel):
     topic:str
     style:str
-@app.post('/poem')
+@app.post('/ai/poem')
 async def translate(request: PoemsRequest):
     print('request',request.topic,request.style)
     #http://localhost:11434/api/generate,json=payload를 generatoe()함수가 대신 해준다.
